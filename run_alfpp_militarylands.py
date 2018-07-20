@@ -23,7 +23,8 @@ historical_maps_path = '/Data/Base_Data/ALFRESCO/AK_CAN_ALF_fires_geotiffs/files
 subdomains_fn = '/workspace/Shared/Users/malindgren/TEST_NANCY_DOD/InstallationBdry_buffered.shp'
 id_field = 'id'
 name_field = 'name'
-output_path = '/workspace/Shared/Users/malindgren/TEST_NANCY_DOD/alfresco'
+# output_path = '/workspace/Shared/Users/malindgren/TEST_NANCY_DOD/alfresco'
+output_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/alfresco'
 obs_json_fn = os.path.join( output_path, 'historical_observed.json' )
 metrics = [ 'veg_counts','avg_fire_size','number_of_fires','all_fire_sizes','total_area_burned','severity_counts' ]
 
@@ -32,7 +33,7 @@ pp_hist = ap.run_postprocessing_historical( historical_maps_path, obs_json_fn, n
 metrics = [ 'avg_fire_size','number_of_fires','all_fire_sizes','total_area_burned' ]
 out = ap.to_csvs( pp_hist, metrics, output_path, 'historical_observed', observed=True )
 pp_hist.close()
-maps_path=historical_maps_path; out_json_fn=obs_json_fn; ncores=32; veg_name_dict=ap.veg_name_dict; subdomains_fn=subdomains_fn; id_field='id'; name_field='name'; background_value=0 
+# maps_path=historical_maps_path; out_json_fn=obs_json_fn; ncores=32; veg_name_dict=ap.veg_name_dict; subdomains_fn=subdomains_fn; id_field='id'; name_field='name'; background_value=0 
 
 # run
 curdirname = '{}_{}'.format(model, scenario)
@@ -42,7 +43,7 @@ maps_path = os.path.join( base_path, curdirname, 'Maps' )
 
 # PostProcess
 alfresco output gtiffs
-pp = ap.run_postprocessing( maps_path, mod_json_fn, ncores, ap.veg_name_dict, subdomains_fn, id_field, name_field )
+pp = ap.run_postprocessing( maps_path, mod_json_fn, ncores, ap.veg_name_dict, subdomains_fn, id_field, name_field, lagfire=False )
 
 # CSVs
 # modeled
