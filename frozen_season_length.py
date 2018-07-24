@@ -107,3 +107,11 @@ plt.close()
 # np.where((freeze != 0) & (thaw == 0)& (boundary_mask > 0)) # thaw is zero --> NO THAW of TOP LAYER --> [NOTE]: not in our region
 # np.where((freeze == 0) & (thaw == 0)& (boundary_mask > 0)) # both are zero --> [NOTE]: not in our region
 
+# meta['count'] = freeze_ds.freezeUp_Day.shape[0]
+# with rasterio.open('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/SNAP_TEST_GIPL/freeze_dates.tif', 'w', **meta ) as out:
+#     out.write( freeze_ds.freezeUp_Day.data.astype( np.int32 ) )
+
+# meta['count'] = thaw_ds.thawOut_Day.shape[0]
+# with rasterio.open('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/SNAP_TEST_GIPL/thaw_dates.tif', 'w', **meta ) as out:
+#     out.write( thaw_ds.thawOut_Day.data.astype( np.int32 ) )
+

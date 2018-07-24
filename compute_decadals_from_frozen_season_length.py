@@ -7,19 +7,21 @@ def compute_mean( arr ):
     return np.rint( np.nanmean(arr, axis=0) )
 
 if __name__ == '__main__':
+    import rasterio, os, glob
     import xarray as xr
-    import rasterio
     import numpy as np
     import pandas as pd
 
     path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length'
-    files = os.path.join( path, '*.nc' )
+    out_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/decadal'
+    files = glob.glob(os.path.join( path, '*.nc' ))
+    files = [ fn for fn in files if 'cru40' not in fn ]
     # the template is a raw file from the GIPL data delivery to use for metadata...
     template_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP45/ALT_Freeze_Thaw_Days_TIF/gipl2f_thawOut_Day_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior_2016.tif'
     begin = '2020'
     end = '2099'
+
     for fn in files:
-        # fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/gipl2f_frozen_length_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior.nc'
         ds = xr.open_dataset( fn )
         variable = 'frozen_length'
         basename = os.path.basename( fn ).split('.')[0]+'_decadal'
