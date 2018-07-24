@@ -96,7 +96,7 @@ def make_nc( filenames, out_fn, variable, ncpus=32 ):
         
     # [TODO]: add attrs to the filename
     # - proj4string, metadata, etc...
-    new_ds.attrs.update( proj4string=rasterio.open(files[0]).crs.to_string() )
+    new_ds.attrs.update( proj4string=rasterio.open(files[0]).crs.to_string(), EPSG=3338 )
     
     # dump to disk
     new_ds.to_netcdf( out_fn, mode='w', format='NETCDF4' )
@@ -109,19 +109,53 @@ if __name__ == '__main__':
     import os, glob
     import multiprocessing as mp
     import pandas as pd
+    import argparse
 
-    # path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP85/ALT_Freeze_Thaw_Days_TIF'
-    path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP45/ALT_Freeze_Thaw_Days_TIF'
-    # wildcard = 'thawOut_Day'
-    # wildcard = 'freezeUp_Day'
-    wildcard = 'ALT'
-    # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_thawOut_Day_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
-    # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_freezeUp_Day_0.5m_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
-    output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_ALT_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
+    parser = argparse.ArgumentParser( description='stack GIPL model thawOut_Day / freezeUp_Day to NetCDF -- DOD Ft.Wainwright Project' )
+    parser.add_argument( '-p', '--path', action='store', dest='path', type=str, help='path to the folder containing the GIPL GeoTiff files' )
+    parser.add_argument( '-v', '--variable', action='store', dest='variable', type=str, help='variable name --> (typically) "thawOut_Day" / "freezeUp_Day"' )
+    parser.add_argument( '-g', '--group', action='store', dest='group', type=str, help='group name --> (typically) "cru40" / "ar5_5modelAvg_rcp85" / "ar5_5modelAvg_rcp45"' )
+    parser.add_argument( '-o', '--output_filename', action='store', dest='output_filename', type=str, help='full pathname of the output NetCDF4 file to be produced.' )
+    args = parser.parse_args()
 
-    # get the files
-    files = sorted( glob.glob( os.path.join( path, '*{}*5modelAvg*.tif'.format(wildcard) ) ) )
+    # parse the args for ease of use
+    path = args.path
+    variable = args.variable
+    group = args.group
+    output_filename = args.output_filename
+
+    files = sorted( glob.glob( os.path.join( path, '*{}*{}*.tif'.format(variable, group) ) ) )
 
     # stack them into a somewhat fleshed-out, but functional NetCDF file
-    make_nc( files, output_filename, wildcard, ncpus=8 )
+    make_nc( files, output_filename, variable, ncpus=8 )
 
+
+
+# # # # # # # # # EXAMPLE RUN: # # # # # # # # 
+# import subprocess, os
+
+# prefix_lu = {'thawOut_Day':'gipl2f_thawOut_Day_5cm','freezeUp_Day':'gipl2f_freezeUp_Day_0.5m'}
+# out_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl_netcdf'
+# for group in ['cru40', 'ar5_5modelAvg_rcp45', 'ar5_5modelAvg_rcp85']:
+#     for variable in ['thawOut_Day', 'freezeUp_Day']:
+#         output_filename = os.path.join( out_path, '_'.join([prefix_lu[variable],group,'1km_ak_Interior.nc']))
+#         print(output_filename)
+#         _ = subprocess.call(['python','stack_GIPL_output_to_NetCDF.py','-p', path, '-v', variable, '-g', group, '-o', output_filename])
+
+
+# # # # # # # # # # # # # # # # # # # # # # # #
+
+# # # # # OLDER JUNK:
+    # # path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP85/ALT_Freeze_Thaw_Days_TIF'
+    # group = 'cru40' # 'ar5_5modelAvg_rcp85'
+    # path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP45/ALT_Freeze_Thaw_Days_TIF'
+    # # variable = 'thawOut_Day'
+    # variable = 'freezeUp_Day'
+    # # variable = 'ALT'
+    # # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_thawOut_Day_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
+    # # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_freezeUp_Day_0.5m_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
+    # # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_ALT_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
+    # # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_ALT_ar5_5modelAvg_rcp45_1km_ak_Interior_EPSG3338.nc'
+    # # get the files
+    # # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_thawOut_Day_5cm_{}_1km_ak_Interior_EPSG3338.nc'.format(group)
+    # output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl2f_freezeUp_Day_0.5m_{}_1km_ak_Interior_EPSG3338.nc'.format(group)
