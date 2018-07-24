@@ -123,7 +123,7 @@ if __name__ == '__main__':
 	# output_path = args.output_path
 	# threshold = args.threshold
 	
-	output_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/alfresco/fire_counts_csvs'
+	output_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/alfresco/annual_area_burned_csvs'
 	json_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/alfresco'
 	threshold = 0
 

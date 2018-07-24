@@ -73,6 +73,7 @@ if __name__ == '__main__':
 	from shapely.geometry import Point
 	import os, glob
 	import multiprocessing as mp
+	import seaborn as sns
 
 	# boundary shapefile and grid shapefile
 	shp_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/shapefiles/InstallationBoundary_SNAP_modified.shp'
@@ -118,21 +119,23 @@ if __name__ == '__main__':
 		data = kwargs.pop('data')
 		d = data.pivot(index=args[1], columns=args[0], values=args[2])
 		ax = sns.heatmap(d, **kwargs)
-		ax.vlines([297,24],0,13)
+		# ax.vlines([297,24],0,13)
 
 	df_dec = pd.concat( hold )
 	melted = df_dec.reset_index().melt(['facilityNu','Day','decade'])
 	for i in range(1,6,1):
 		cur_data = melted[melted.facilityNu == i]
+		vmax = cur_data.value.max().round(0)
+		vmin = cur_data.value.min().round(0)
 		# cmap = sns.diverging_palette(240, 10, center='light', as_cmap=True)
 
 		midpoint = 1 - cur_data['value'].max()/(cur_data['value'].max() + abs(cur_data['value'].min()))
 		cmap = shiftedColorMap(plt.get_cmap('RdBu_r'), midpoint=midpoint, name='RdBu_r_shifted')
 		# cmap = shiftedColorMap(cmap, midpoint=0, name='RdYlBu_r_shifted')
 
-		fg = sns.FacetGrid( cur_data, row='decade', size=4, aspect=3 )
-		fg.map_dataframe( draw_heatmap, 'Day', 'variable', 'value', cbar=True, square=False, cmap=cmap )
-		plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/test_heat_decades_{}.png'.format(i))
+		fg = sns.FacetGrid( cur_data, row='decade', size=4, aspect=3, sharey=True )
+		ax = fg.map_dataframe( draw_heatmap, 'Day', 'variable', 'value', cbar=True, square=False, cmap=cmap, vmin=vmin, vmax=vmax )
+		plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/plots_July2018/soildepth_heatmap_decades_{}.png'.format(''.join(e for e in boundary_groups[i] if e.isalnum())))
 		plt.close()
 
 
