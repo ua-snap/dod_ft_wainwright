@@ -100,7 +100,7 @@ out_df = pd.DataFrame({ pd.Timestamp(sub_ds.time.data).year:get_mean_installboun
 ax = out_df.T.plot( kind='line', title='Frozen Period Length (days)' )
 ax.set_xlabel( 'Decade' )
 ax.set_ylabel( 'Days' )
-plt.savefig( '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/SNAP_TEST_GIPL/freeze_to_thaw_length_decadal.png' )
+plt.savefig( '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/plots_July2018/freeze_to_thaw_length_decadal.png' )
 plt.close()
 
 # # not in our region lookups below, but may be still necessary:
