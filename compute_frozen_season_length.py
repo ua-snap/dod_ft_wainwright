@@ -62,8 +62,17 @@ if __name__ == '__main__':
         out_arr[ i,j,k ] = freeze_length_days( thaw[i,j,k], freeze[i,j,k], years[i], years[i] )
 
     # freeze is zero --> NO FREEZE to 0.5m -- make these values 0
-    ind = np.where((freeze == 0) & (thaw != 0) ) 
+    ind = np.where((freeze == 0) & (thaw != 0) )
     out_arr[ ind ] = 0
+
+    # [new] thaw is zero freeze > 0 --> never thawed...
+    ind = np.where( (thaw == 0) & (freeze > 0) )
+    # 365 - freezeday # (?)
+    out_arr[ ind ] = 365 - freeze[ ind ]
+
+    # [new] if both are zero --> never freeze and never thaw --> must be 365
+    ind = np.where( (thaw == 0) & (freeze == 0))
+    out_arr[ ind ] = 365
 
     # use year+1 for thaw year for proper daycount using datetime.date
     ind = np.where((freeze > thaw) & (freeze != -9999) & (freeze != 0) & (thaw != 0)) 
@@ -85,7 +94,7 @@ if __name__ == '__main__':
     ds.to_netcdf( output_filename, mode='w', format='NETCDF4' )
 
 
-# # # # # # EXAMPLE RUN: # # # # # 
+# # # # # # # EXAMPLE RUN: # # # # # 
 # import os, subprocess, glob
 
 # path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl_netcdf'
@@ -99,4 +108,4 @@ if __name__ == '__main__':
 #     new_fn = os.path.basename( files['thawOut_Day'] ).replace('thawOut_Day', 'frozen_length')
 #     output_filename = os.path.join( out_path, new_fn )
 #     _ = subprocess.call([ 'python','compute_frozen_season_length.py','-t',files['thawOut_Day'],'-f',files['freezeUp_Day'],'-o',output_filename ])
-# # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # 
