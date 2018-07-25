@@ -15,25 +15,32 @@ if __name__ == '__main__':
     path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length'
     out_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/decadal'
     files = glob.glob(os.path.join( path, '*.nc' ))
-    files = [ fn for fn in files if 'cru40' not in fn ]
+
     # the template is a raw file from the GIPL data delivery to use for metadata...
     template_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP45/ALT_Freeze_Thaw_Days_TIF/gipl2f_thawOut_Day_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior_2016.tif'
     begin = '2020'
     end = '2099'
 
     for fn in files:
+        if 'cru40' in fn:
+            begin, end = '1960', '2009'
+            b,e = '1960', '2000'
+        else:
+            begin, end = '2020', '2099'
+            b,e = '2020', '2090'
+
         ds = xr.open_dataset( fn )
         variable = 'frozen_length'
-        basename = os.path.basename( fn ).split('.')[0]+'_decadal'
+        basename = os.path.basename( fn ).split('.')[0]+'_decadal_{}-{}'.format(b,e)
         output_filename = os.path.join( out_path, basename )
         
         # make decadal
         ds_sel = ds.sel( time=slice( str(begin), str(end)) ).astype(np.float32)
         ds_sel[ variable ].data[ ds_sel[ variable ].data == -9998 ] = np.nan # deal with -9998...
 
-        ds_dec = ds_sel[ variable ].resample( time='10A' )
+        ds_dec = ds_sel[ variable ].resample( time='10AS' )
         dec_means = np.array([ compute_mean(ds_sel[variable].isel(time=j).data) for i,j in ds_dec.groups.items() ])
-        ds_dec = ds_dec.mean(axis=0)
+        ds_dec = ds_dec.mean(axis=0).sel(time=slice(b,e))
         ds_dec.data = dec_means # update it with the proper np.nanmean outputs
 
         # write to a NetCDF

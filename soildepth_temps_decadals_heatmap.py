@@ -75,6 +75,10 @@ if __name__ == '__main__':
 	import multiprocessing as mp
 	import seaborn as sns
 
+	rcps = ['45','85']
+	# path where the GIPL ASCII outputs are stored.
+	data_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP{}/Daily_Temperature_ASCII'
+	output_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/plots'
 	# boundary shapefile and grid shapefile
 	shp_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/shapefiles/InstallationBoundary_SNAP_modified.shp'
 	grid_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP85/ALT_Freeze_Thaw_Days_ASCII/spatial_Grid_ak_Interior_11942.csv'
@@ -94,49 +98,48 @@ if __name__ == '__main__':
 	jdf.loc[:,'facilityNu'] = jdf.loc[:,'facilityNu'].astype( int ) # update dtype
 
 	# open the temperature dailies at depths csv for a single year
-	dat_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP85/Daily_Temperature_ASCII/gipl2f_soil_temp_daily_ar5_5modelAvg_rcp85_1km_ak_Interior_2052.txt'
-	base_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP85/Daily_Temperature_ASCII'
-	# years = [ int(os.path.basename(fn).split('.')[0].split('_')[-1]) for fn in files ]
-	# decades = [ str(year)[:-3]+'0' for year in years ]
 	datacols =['0.00', '0.01', '0.02', '0.03', '0.04', '0.05', '0.10', '0.20', '0.30', '0.40', '0.50', '0.75', '1.00']
 	boundary_groups = {1:'Ft.Wainwright', 2:'Eielson/YC', 3:'Donnelly', 4:'Gerstle', 5:'Black Rapids/Whistler'}
 
-	decadal_means = dict()
-	hold = []
-	for decade in range( 2020, 2051, 10 ):
-		print( decade )
-		files = sorted( glob.glob( os.path.join( base_path, '*{}*.txt'.format( str(decade)[:3]) )))
-		# make decadal averages using the above logic. -- hack pool below. its a mess.
-		pool = mp.Pool( 32 )
-		data = pool.map( make_data, files )
-		pool.close()
-		pool.join()
-		df = (sum(data)/len(data))[ datacols ]
-		df['decade'] = decade
-		hold = hold + [df]
+	for rcp in rcps:
+		cur_path = data_path.format( rcp )
 
-	def draw_heatmap(*args, **kwargs):
-		data = kwargs.pop('data')
-		d = data.pivot(index=args[1], columns=args[0], values=args[2])
-		ax = sns.heatmap(d, **kwargs)
-		# ax.vlines([297,24],0,13)
+		decadal_means = dict()
+		hold = []
+		for decade in range( 2020, 2051, 10 ):
+			print( decade )
+			files = sorted( glob.glob( os.path.join( cur_path, '*{}*.txt'.format( str(decade)[:3]) )))
+			# make decadal averages using the above logic. -- hack pool below. its a mess.
+			pool = mp.Pool( 32 )
+			data = pool.map( make_data, files )
+			pool.close()
+			pool.join()
+			df = (sum(data)/len(data))[ datacols ]
+			df['decade'] = decade
+			hold = hold + [df]
 
-	df_dec = pd.concat( hold )
-	melted = df_dec.reset_index().melt(['facilityNu','Day','decade'])
-	for i in range(1,6,1):
-		cur_data = melted[melted.facilityNu == i]
-		vmax = cur_data.value.max().round(0)
-		vmin = cur_data.value.min().round(0)
-		# cmap = sns.diverging_palette(240, 10, center='light', as_cmap=True)
+		def draw_heatmap(*args, **kwargs):
+			data = kwargs.pop('data')
+			d = data.pivot(index=args[1], columns=args[0], values=args[2])
+			ax = sns.heatmap(d, **kwargs)
+			# ax.vlines([297,24],0,13)
 
-		midpoint = 1 - cur_data['value'].max()/(cur_data['value'].max() + abs(cur_data['value'].min()))
-		cmap = shiftedColorMap(plt.get_cmap('RdBu_r'), midpoint=midpoint, name='RdBu_r_shifted')
-		# cmap = shiftedColorMap(cmap, midpoint=0, name='RdYlBu_r_shifted')
+		df_dec = pd.concat( hold )
+		melted = df_dec.reset_index().melt(['facilityNu','Day','decade'])
+		for i in range(1,6,1):
+			cur_data = melted[melted.facilityNu == i]
+			vmax = cur_data.value.max().round(0)
+			vmin = cur_data.value.min().round(0)
+			# cmap = sns.diverging_palette(240, 10, center='light', as_cmap=True)
 
-		fg = sns.FacetGrid( cur_data, row='decade', size=4, aspect=3, sharey=True )
-		ax = fg.map_dataframe( draw_heatmap, 'Day', 'variable', 'value', cbar=True, square=False, cmap=cmap, vmin=vmin, vmax=vmax )
-		plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/plots_July2018/soildepth_heatmap_decades_{}.png'.format(''.join(e for e in boundary_groups[i] if e.isalnum())))
-		plt.close()
+			midpoint = 1 - cur_data['value'].max()/(cur_data['value'].max() + abs(cur_data['value'].min()))
+			cmap = shiftedColorMap(plt.get_cmap('RdBu_r'), midpoint=midpoint, name='RdBu_r_shifted')
+			# cmap = shiftedColorMap(cmap, midpoint=0, name='RdYlBu_r_shifted')
+
+			fg = sns.FacetGrid( cur_data, row='decade', height=4, aspect=3, sharey=True ) # changed size to height
+			ax = fg.map_dataframe( draw_heatmap, 'Day', 'variable', 'value', cbar=True, square=False, cmap=cmap, vmin=vmin, vmax=vmax )
+			plt.savefig(os.path.join( output_path, 'soildepth_heatmap_decades_rcp{}_{}.png'.format(rcp,''.join(e for e in boundary_groups[i] if e.isalnum()))))
+			plt.close()
 
 
 		# for i in range(1,6,1):
@@ -199,9 +202,9 @@ if __name__ == '__main__':
 
 
 
-	single_area_singleday = areawide_temperature_means_day.loc[(1,1)]
+	# single_area_singleday = areawide_temperature_means_day.loc[(1,1)]
 	
-	# plot?
-	areawide_temperature_means_day[datacols].plot()
-	plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/test_allplot.png' )
-	plt.close()
+	# # plot?
+	# areawide_temperature_means_day[datacols].plot()
+	# plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/test_allplot.png' )
+	# plt.close()
