@@ -7,12 +7,12 @@ import rasterio
 import numpy as np
 
 path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/decadal_diff_from_baseline'
-files = [ fn for fn in glob.glob( os.path.join( path, '*.tif' ) ) if '_classified' not in fn ]
+files = [ fn for fn in glob.glob( os.path.join( path, '*.tif' ) ) if '_classified' not in fn and '2020-2090' in fn ]
 
 for fn in files:
 	dirname, basename = os.path.split( fn )
 	print( 'classifying: {}'.format( basename ) )
-	output_filename = os.path.join( dirname, basename.replace( '.tif', '_classified.tif') )
+	output_filename = os.path.join( dirname, basename.replace( '.tif', '_classified.tif' ) )
 
 	bins = [-365,-45,-15,0,1,15,30,60,90,365]
 	# 1<-45 
@@ -42,4 +42,3 @@ for fn in files:
 		output_filename = os.path.join( dirname, basename.replace('2020-2090',str(decade)).replace( '.tif', '_classified.tif') )
 		with rasterio.open( output_filename, 'w', **meta ) as out:
 			out.write( new_arr[idx].astype( np.float32 ), 1 )
-
