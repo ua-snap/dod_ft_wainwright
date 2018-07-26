@@ -18,7 +18,7 @@ if __name__ == '__main__':
     
     fn = args.fn
     template_fn = args.template_fn
-    output_filename = args.output_filename
+    out_path = args.out_path
 
     if 'cru40' in fn:
         begin, end = '1960', '2009'
