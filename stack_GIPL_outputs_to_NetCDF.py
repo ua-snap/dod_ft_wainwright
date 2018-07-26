@@ -116,6 +116,8 @@ if __name__ == '__main__':
     parser.add_argument( '-v', '--variable', action='store', dest='variable', type=str, help='variable name --> (typically) "thawOut_Day" / "freezeUp_Day"' )
     parser.add_argument( '-g', '--group', action='store', dest='group', type=str, help='group name --> (typically) "cru40" / "ar5_5modelAvg_rcp85" / "ar5_5modelAvg_rcp45"' )
     parser.add_argument( '-o', '--output_filename', action='store', dest='output_filename', type=str, help='full pathname of the output NetCDF4 file to be produced.' )
+    parser.add_argument( '-b', '--begin_year', action='store', dest='begin_year', nargs='?', const=None, type=int, help='the year the series should start from.  file lists will be filtered to begin, end' )
+    parser.add_argument( '-e', '--end_year', action='store', dest='end_year', nargs='?', const=None, type=int, help='the year the series should end.  file lists will be filtered to begin, end' )
     args = parser.parse_args()
 
     # parse the args for ease of use
@@ -123,29 +125,40 @@ if __name__ == '__main__':
     variable = args.variable
     group = args.group
     output_filename = args.output_filename
+    begin_year = args.begin_year
+    end_year = args.end_year
 
+    # list all available files
     files = sorted( glob.glob( os.path.join( path, '*{}*{}*.tif'.format(variable, group) ) ) )
+
+    # filter to only the years we want... 
+    if begin_year != None and end_year != None:
+        files = [ fn for fn in files if int(fn.split('.').split('_')[-1]) in list(range(begin_year, end_year+1)) ]
 
     # stack them into a somewhat fleshed-out, but functional NetCDF file
     make_nc( files, output_filename, variable, ncpus=8 )
 
 
-
 # # # # # # # # # # EXAMPLE RUN: # # # # # # # # 
 # import subprocess, os
-#
-# prefix_lu = {'thawOut_Day':'gipl2f_thawOut_Day_5cm','freezeUp_Day':'gipl2f_freezeUp_Day_0.5m'}
+
+# prefix_lu = {'thawOut_Day':'gipl2f_thawOut_Day_5cm','freezeUp_Day':'gipl2f_freezeUp_Day_0.5m','ALT':'gipl2f_ALT'}
 # out_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/gipl_netcdf'
 # for group in ['cru40', 'ar5_5modelAvg_rcp45', 'ar5_5modelAvg_rcp85']:
 #     if group in ['cru40','ar5_5modelAvg_rcp45']:
 #         rcp=45
 #     else:
 #         rcp=85        
-#    
+#     if group == 'cru40':
+#         b,e = 1960, 2015
+#     else:
+#         b,e = 2016, 2099
+
 #     path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP{}/ALT_Freeze_Thaw_Days_TIF'.format(rcp)
 #     for variable in ['thawOut_Day', 'freezeUp_Day', 'ALT']:
-#         output_filename = os.path.join( out_path, '_'.join([prefix_lu[variable],group,'1km_ak_Interior.nc']))
-#         _ = subprocess.call(['python','stack_GIPL_outputs_to_NetCDF.py','-p', path, '-v', variable, '-g', group, '-o', output_filename])
+#         output_filename = os.path.join( out_path, '_'.join([prefix_lu[variable],group,'1km_ak_Interior_{}-{}.nc'.format(b,e)]))
+#         os.chdir( '/workspace/UA/malindgren/repos/dod_ft_wainwright' )
+#         _ = subprocess.call(['python','stack_GIPL_outputs_to_NetCDF.py','-p', path, '-v', variable, '-g', group, '-o', output_filename, '-b', b, '-e', e ])
 #         print('completed: {} '.format(output_filename))
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
