@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     # filter to only the years we want... 
     if begin_year != None and end_year != None:
-        files = [ fn for fn in files if int(fn.split('.').split('_')[-1]) in list(range(begin_year, end_year+1)) ]
+        files = [ fn for fn in files if int(fn.split('.')[0].split('_')[-1]) in list(range(begin_year, end_year+1)) ]
 
     # stack them into a somewhat fleshed-out, but functional NetCDF file
     make_nc( files, output_filename, variable, ncpus=8 )
@@ -158,7 +158,7 @@ if __name__ == '__main__':
 #     for variable in ['thawOut_Day', 'freezeUp_Day', 'ALT']:
 #         output_filename = os.path.join( out_path, '_'.join([prefix_lu[variable],group,'1km_ak_Interior_{}-{}.nc'.format(b,e)]))
 #         os.chdir( '/workspace/UA/malindgren/repos/dod_ft_wainwright' )
-#         _ = subprocess.call(['python','stack_GIPL_outputs_to_NetCDF.py','-p', path, '-v', variable, '-g', group, '-o', output_filename, '-b', b, '-e', e ])
+#         _ = subprocess.call(['python','stack_GIPL_outputs_to_NetCDF.py','-p', path, '-v', variable, '-g', group, '-o', output_filename, '-b', str(b), '-e', str(e) ])
 #         print('completed: {} '.format(output_filename))
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
