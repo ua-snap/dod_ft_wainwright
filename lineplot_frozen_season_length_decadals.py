@@ -67,6 +67,7 @@ if __name__ == '__main__':
         ax.hlines(minvalue, xmin=2020, xmax=2090, capstyle='butt' )
         ax.text(2050, minvalue-4, 'CMIP5 Future (RCP{})'.format(rcp), ha='center', va='center')
         ymin,ymax = ax.get_ylim()
+        # deal with the lower limit of the plot and the ar5 modeled description being a tad too low.
         if minvalue-20 < 0:
             ymin = 0
         else:

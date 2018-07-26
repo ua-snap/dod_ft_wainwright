@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     with rasterio.open( template_fn ) as tmp:
         meta = tmp.meta.copy()
-        meta.update( compress='lzw', count=1 )
+        meta.update( compress='lzw', count=1, nodata=-9999 )
 
     # GTiff
     with rasterio.open( output_filename + '.tif', 'w', **meta ) as out:

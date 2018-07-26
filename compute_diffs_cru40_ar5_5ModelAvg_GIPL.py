@@ -18,24 +18,20 @@ cru_lta = rasterio.open( cru_fn ).read( 1 )
 decades = list(range(2020,2091,10))
 for ind, rcp in enumerate(rcps):
 	ar5 = rasterio.open(ar5_files[ind]).read()
-
-	ar5[ ar5 == -9998 ] = np.nan # set the unsolvable to nan for the time being.
-
-	# cru = cru.astype(np.float32)
-	# cru[cru == -9998] = np.nan
-	# cru_lta = np.rint( np.nanmean( cru, axis=0 ) )
-
+	
 	ar5_deltas = np.array([ (cru_lta - arr) for arr in ar5 ])
 	_ = [np.place(arr,ar5[0] == -9999, -9999) for arr in ar5_deltas ] # update the mask
 
-	# set the np.nan to zero? I really need to think this through and clean up this codebase.
-	ar5_deltas[np.isnan(ar5_deltas)] = 0
-
 	with rasterio.open( ar5_files[ind] ) as tmp:
 		meta = tmp.meta.copy()
-		meta.update(compress='lzw', count=ar5_deltas.shape[0])
+		meta.update( compress='lzw', count=ar5_deltas.shape[0], nodata=-9999 )
 
 	with rasterio.open( output_filenames[ind], 'w', **meta ) as out:
 		out.write( ar5_deltas.astype(np.float32) )
 
+	for idx, decade in enumerate( decades ):
+		out_fn = output_filenames[ind].replace('_2020-2090.tif', '_{}.tif'.format(decade))
 
+		meta.update( count=1 )
+		with rasterio.open( out_fn, 'w', **meta ) as out:
+			out.write( ar5_deltas[idx].astype(np.float32), 1 )
