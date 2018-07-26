@@ -13,7 +13,7 @@ if __name__ == '__main__':
     import numpy as np
     import pandas as pd
 
-    fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/gipl2f_frozen_length_5cm_cru40_1km_ak_Interior.nc'
+    fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/gipl2f_frozen_length_5cm_cru40_1km_ak_Interior_1951-2015.nc'
     output_filename = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/decadal/gipl2f_frozen_length_5cm_cru40_1km_ak_Interior_LTA_1951-2015'
     template_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP45/ALT_Freeze_Thaw_Days_TIF/gipl2f_thawOut_Day_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior_2016.tif'
     variable = 'frozen_length'

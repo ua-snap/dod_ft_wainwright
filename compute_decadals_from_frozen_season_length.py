@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     ds = xr.open_dataset( fn )
     variable = 'frozen_length'
-    basename = os.path.basename( fn ).split('.')[0]+'_decadal_{}-{}'.format(b,e)
+    basename = os.path.basename( fn ).split('.')[0][:-2]+'_decadal_{}-{}'.format(b,e)
     output_filename = os.path.join( out_path, basename )
     
     # make decadal
