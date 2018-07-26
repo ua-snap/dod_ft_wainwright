@@ -133,8 +133,8 @@ if __name__ == '__main__':
 
     # filter to only the years we want... 
     if begin_year != None and end_year != None:
-        files = [ fn for fn in files if int(fn.split('.')[0].split('_')[-1]) in list(range(begin_year, end_year+1)) ]
-
+        files = [ fn for fn in files if int(fn.split('_')[-1].split('.')[0]) in list(range(begin_year, end_year+1)) ]
+        
     # stack them into a somewhat fleshed-out, but functional NetCDF file
     make_nc( files, output_filename, variable, ncpus=8 )
 
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 #     if group in ['cru40','ar5_5modelAvg_rcp45']:
 #         rcp=45
 #     else:
-#         rcp=85        
+#         rcp=85
 #     if group == 'cru40':
 #         b,e = 1960, 2015
 #     else:
@@ -156,6 +156,7 @@ if __name__ == '__main__':
 
 #     path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP{}/ALT_Freeze_Thaw_Days_TIF'.format(rcp)
 #     for variable in ['thawOut_Day', 'freezeUp_Day', 'ALT']:
+#         print( variable )
 #         output_filename = os.path.join( out_path, '_'.join([prefix_lu[variable],group,'1km_ak_Interior_{}-{}.nc'.format(b,e)]))
 #         os.chdir( '/workspace/UA/malindgren/repos/dod_ft_wainwright' )
 #         _ = subprocess.call(['python','stack_GIPL_outputs_to_NetCDF.py','-p', path, '-v', variable, '-g', group, '-o', output_filename, '-b', str(b), '-e', str(e) ])
