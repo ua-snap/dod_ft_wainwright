@@ -46,10 +46,8 @@ import subprocess, os, glob
 
 path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length'
 out_path = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/SNAP_modified/frozen_season_length/decadal'
-files = glob.glob(os.path.join( path, '*.nc' ))
-
-# the template is a raw file from the GIPL data delivery to use for metadata...
 template_fn = '/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/AR5_5modelAvg_RCP45/ALT_Freeze_Thaw_Days_TIF/gipl2f_thawOut_Day_5cm_ar5_5modelAvg_rcp45_1km_ak_Interior_2016.tif'
+files = glob.glob(os.path.join( path, '*.nc' ))
 
 for fn in files:
     os.chdir( '/workspace/UA/malindgren/repos/dod_ft_wainwright' )
@@ -65,7 +63,7 @@ _ = subprocess.call(['python','compute_long-term-avg_cru40_frozen_season_length.
 # # COMPUTE DIFFS FROM BASELINE LTA FOR RCP45/85
 import subprocess
 os.chdir( '/workspace/UA/malindgren/repos/dod_ft_wainwright' )
-_ = subprocess.call(['python','compute_long-compute_diffs_cru40_ar5_5ModelAvg_GIPL.py'])
+_ = subprocess.call(['python','compute_diffs_cru40_ar5_5ModelAvg_GIPL.py'])
 
 # # CLASSIFY THE DIFF OUTPUTS FOR PLOTTING (?)
 import subprocess
