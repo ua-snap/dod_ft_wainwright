@@ -1,4 +1,4 @@
-# run all this crap
+# run all pre-processing
 
 # # RUN STACKING
 import subprocess, os
@@ -69,7 +69,5 @@ _ = subprocess.call(['python','compute_diffs_cru40_ar5_5ModelAvg_GIPL.py'])
 import subprocess
 os.chdir( '/workspace/UA/malindgren/repos/dod_ft_wainwright' )
 _ = subprocess.call(['python','classify_diffs_cru40_ar5_5ModelAvg_GIPL.py'])
-
-
 
 
