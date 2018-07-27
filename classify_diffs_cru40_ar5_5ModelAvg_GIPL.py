@@ -14,16 +14,16 @@ for fn in files:
 	print( 'classifying: {}'.format( basename ) )
 	output_filename = os.path.join( dirname, basename.replace( '.tif', '_classified.tif' ) )
 
-	bins = [-365,-45,-15,0,1,15,30,60,90,365]
-	# 1<-45 
-	# 2<-15
-	# 3<0
-	# 4<1 <- ZERO NO CHANGE
-	# 5<15
-	# 6<30
-	# 7<60
-	# 8<90
-	# 9<365 <- FULL YEAR
+	bins = [-365,-30,0,1,30,60,90,365]
+	
+	# 1 <- -31 to -365
+	# 2 <- 0 to -30
+	# 3 <- 0 to 1 <- ZERO NO CHANGE
+	# 4 <- 1 to 29 
+	# 5 <- 30 to 60
+	# 6 <- 60 to 90
+	# 7 <- 90 to 365 <- FULL YEAR
+
 	with rasterio.open( fn ) as rst:
 		arr = rst.read()
 

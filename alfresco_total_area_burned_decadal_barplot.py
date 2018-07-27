@@ -38,7 +38,7 @@ locs = ax.xaxis.get_ticklocs()
 new_locs = [ i-0.2 for i in locs[:5] ] + list(locs[5:])
 ax.xaxis.set_ticks(new_locs)
 plt.ylabel('Area Burned (km2)')
-plt.title('ALFRESCO Decadal Mean Area Burned Estimates\n  mean across 200 replicates\n {} buffer'.format(wildcard))
+plt.title('ALFRESCO Decadal Mean Area Burned Estimates\n  mean across 200 replicates and 5 models \n {} buffer'.format(wildcard))
 
 # [TODO]: add in a way to make the bars closer together? --> this may involve something like digging back into the raw axes and moving
 # 			things around as we need them...  I will have to dig into this deeper, it may involve removing 'empty' bar rectangles thrown in 
