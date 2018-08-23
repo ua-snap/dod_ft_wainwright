@@ -98,7 +98,8 @@ if __name__ == '__main__':
 	jdf.loc[:,'facilityNu'] = jdf.loc[:,'facilityNu'].astype( int ) # update dtype
 
 	# open the temperature dailies at depths csv for a single year
-	datacols =['0.00', '0.01', '0.02', '0.03', '0.04', '0.05', '0.10', '0.20', '0.30', '0.40', '0.50', '0.75', '1.00']
+	# datacols =['0.00', '0.01', '0.02', '0.03', '0.04', '0.05', '0.10', '0.20', '0.30', '0.40', '0.50', '0.75', '1.00']
+	datacols = ['0.00','0.10', '0.20', '0.30', '0.40', '0.50']
 	boundary_groups = {1:'Ft.Wainwright', 2:'Eielson/YC', 3:'Donnelly', 4:'Gerstle', 5:'Black Rapids/Whistler'}
 
 	for rcp in rcps:
@@ -106,7 +107,8 @@ if __name__ == '__main__':
 
 		decadal_means = dict()
 		hold = []
-		for decade in range( 2020, 2051, 10 ):
+		decades = range( 2020, 2051, 10 )
+		for decade in decades:
 			print( decade )
 			files = sorted( glob.glob( os.path.join( cur_path, '*{}*.txt'.format( str(decade)[:3]) )))
 			# make decadal averages using the above logic. -- hack pool below. its a mess.
@@ -135,76 +137,42 @@ if __name__ == '__main__':
 			midpoint = 1 - cur_data['value'].max()/(cur_data['value'].max() + abs(cur_data['value'].min()))
 			cmap = shiftedColorMap(plt.get_cmap('RdBu_r'), midpoint=midpoint, name='RdBu_r_shifted')
 			# cmap = shiftedColorMap(cmap, midpoint=0, name='RdYlBu_r_shifted')
+			colnames = cur_data.columns
+			cur_data.columns = [ i if not 'variable' in i else 'depth (m)' for i in colnames ]
 
-			fg = sns.FacetGrid( cur_data, row='decade', height=4, aspect=3, sharey=True ) # changed size to height
-			ax = fg.map_dataframe( draw_heatmap, 'Day', 'variable', 'value', cbar=True, square=False, cmap=cmap, vmin=vmin, vmax=vmax )
-			plt.savefig(os.path.join( output_path, 'soildepth_heatmap_decades_rcp{}_{}.png'.format(rcp,''.join(e for e in boundary_groups[i] if e.isalnum()))))
-			plt.close()
+			with sns.plotting_context( font_scale=2 ):
+				# sns.set( font_scale=1.1 )
+				fg = sns.FacetGrid( cur_data, row='decade', height=4, aspect=3, sharey=True ) # changed size to height
+				g = fg.map_dataframe( draw_heatmap, 'Day', 'depth (m)', 'value', cbar=True, square=False, cmap=cmap, vmin=vmin, vmax=vmax )
+				
+				title_font_dict = {'fontsize': 15,
+								'fontweight' : 'normal',
+								'verticalalignment': 'baseline',
+								'horizontalalignment': 'center'}
 
+				for ax, title in zip( g.axes.flat, [ str(dec)+'s' for dec in decades ] ):
+					ax.set_title( title, title_font_dict )
 
-		# for i in range(1,6,1):
-		# 	biweekly = df.loc[(i,)].groupby(np.repeat(list(range(1,366,14)), 14)[:365]).mean()
-		# 	decadal_means[ decade ] = { i:biweekly.T }
+				# build the proper spacing for the begin/middle/end of months
+				xticks = []
+				month_days = [31,28,31,30,31,30,31,31,30,31,30,31]
+				for idx,ii in enumerate(month_days):
+					if idx > 0:
+						x = x2 + (ii/2)
+						x1 = x - (ii/2)
+						x2 = x + (ii/2)
+					else:
+						x = ii/2
+						x1 = 0
+						x2 = x1+ii
 
-		# 	# areawide_temperature_means_day = df_bounds.groupby(['facilityNu','Day']).mean()
-		# 	# how to select the data
-		# 	# single_area_alldays = areawide_temperature_means_day.loc[(1,), datacols]
-		# 	arr = biweekly.T.as_matrix()
-		# 	rownames = biweekly.T.index
-		# 	colnames = biweekly.T.columns
+					xticks = xticks + [x1,x,x2]
 
-		# 	midpoint = 1 - arr.max()/(arr.max() + abs(arr.min()))
-		# 	cmap = shiftedColorMap(plt.get_cmap('RdYlBu_r'), midpoint=midpoint, name='RdYlBu_r_shifted')
-
-
-		# 	# plot it
-		# 	fig = plt.figure()
-		# 	ax = fig.add_subplot( 111 )
-		# 	cax = ax.matshow( arr, cmap=cmap ) # interpolation='nearest', aspect='auto'
-
-		# 	plt.gca().xaxis.tick_bottom()
-
-		# 	# # ticks and labels
-		# 	# labels, locs = rownames.tolist(), rownames.astype(float).tolist()
-		# 	# plt.yticks(locs, labels)
-
-		# 	# labels, locs = colnames.tolist(), colnames.astype(float).tolist()
-		# 	# plt.xticks(labels,locs)
-
-
-		# 	# set a colorbar to the proper height
-		# 	divider = make_axes_locatable( ax )
-		# 	ccax = divider.append_axes( "right", size="5%", pad=0.05 )
-
-		# 	plt.colorbar( cax, orientation='vertical', cax=ccax )
-
-		# 	# ax.set_yticklabels( rownames[::2].tolist() )
-		# 	# ax.set_xticklabels(colnames)
-		# 	plt.tight_layout()
-		# 	# plt.xticks = colnames
-		# 	plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/SNAP_TEST_GIPL/heatmap_biweek_{}_{}.png'.format(boundary_groups[i].replace(' ', '').replace('/','').replace('.',''),decade), figsize=(9,11))
-		# 	plt.close()
-
-		# 	# SEABORN
-		# 	import seaborn as sns; sns.set()
-		# 	melted = df.reset_index().melt(['facilityNu','Day'])
-		# 	fg = sns.FacetGrid( melted, col='facilityNu' )
-
-		# 	ax = sns.heatmap( arr )
-
-		# 	ax.vlines([6,24],0,13)
-		# 	plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/SNAP_TEST_GIPL/heatmap_biweek_{}_{}_SEABORN.png'.format(boundary_groups[i].replace(' ', '').replace('/','').replace('.',''),decade), figsize=(9,11))
-		# 	plt.close()
-
-
-
-# # # END WORKING
-
-
-
-	# single_area_singleday = areawide_temperature_means_day.loc[(1,1)]
-	
-	# # plot?
-	# areawide_temperature_means_day[datacols].plot()
-	# plt.savefig('/workspace/Shared/Tech_Projects/DOD_Ft_Wainwright/project_data/GIPL/test_allplot.png' )
-	# plt.close()
+				xticks = sorted(list(set(xticks)))
+		
+				g.set( xlim=(min(xticks), max(xticks)), xticks=np.array(xticks) )
+				months = ['','Jan','','Feb','','Mar','', 'Apr','', 'May', '', 'Jun', '', 'Jul', '', 'Aug','', 'Sep', '', 'Oct', '', 'Nov', '', 'Dec', '' ]
+				g.set_xticklabels( months, rotation=0 )
+				
+				plt.savefig(os.path.join( output_path, 'soildepth_heatmap_decades_rcp{}_{}_{}-{}.png'.format(rcp,''.join(e for e in boundary_groups[i] if e.isalnum()), str(decades[0])+'s', str(decades[-1])+'s') ))
+				plt.close()
